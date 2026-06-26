@@ -128,13 +128,18 @@ extension CookieClient {
     }
     var shouldFetchIgneous: Bool {
         let url = Defaults.URL.exhentai
+        let igneousValue = getCookie(url, Defaults.Cookie.igneous).rawValue
         return !getCookie(url, Defaults.Cookie.ipbMemberId).rawValue.isEmpty
         && !getCookie(url, Defaults.Cookie.ipbPassHash).rawValue.isEmpty
-        && getCookie(url, Defaults.Cookie.igneous).rawValue.isEmpty
+        && (igneousValue.isEmpty || igneousValue == Defaults.Cookie.mystery)
     }
     func removeYay() {
         removeCookie(Defaults.URL.exhentai, Defaults.Cookie.yay)
         removeCookie(Defaults.URL.sexhentai, Defaults.Cookie.yay)
+    }
+    func removeIgneous() {
+        removeCookie(Defaults.URL.exhentai, Defaults.Cookie.igneous)
+        removeCookie(Defaults.URL.sexhentai, Defaults.Cookie.igneous)
     }
     func syncExCookies() {
         let cookies = [

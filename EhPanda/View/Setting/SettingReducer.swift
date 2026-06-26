@@ -6,6 +6,16 @@
 import Foundation
 import ComposableArchitecture
 
+private enum IgneousRefreshTracker {
+    static var lastAttempt: Date?
+    static let cooldown: TimeInterval = 30 * 60
+
+    static var canAttempt: Bool {
+        guard let last = lastAttempt else { return true }
+        return Date().timeIntervalSince(last) > cooldown
+    }
+}
+
 @Reducer
 struct SettingReducer {
     @CasePathable
@@ -299,8 +309,13 @@ struct SettingReducer {
                 }
 
             case .fetchIgneous:
-                guard cookieClient.didLogin else { return .none }
+                guard cookieClient.didLogin,
+                      cookieClient.shouldFetchIgneous,
+                      IgneousRefreshTracker.canAttempt
+                else { return .none }
+                IgneousRefreshTracker.lastAttempt = Date()
                 return .run { send in
+                    cookieClient.removeIgneous()
                     let response = await IgneousRequest().response()
                     await send(.fetchIgneousDone(response))
                 }
